@@ -1,12 +1,13 @@
 import { Config, StorageInfo, StorageLoad } from '@dash/common';
 import { faHdd } from '@fortawesome/free-solid-svg-icons';
 import { Variants } from 'framer-motion';
-import { FC, useMemo } from 'react';
-import { Bar, Cell } from 'recharts';
+import { FC, useMemo, useState } from 'react';
+import { Bar, Cell, LabelList } from 'recharts';
 import { useTheme } from 'styled-components';
 import {
   DefaultPieChart,
   DefaultVertBarChart,
+  VertBarStartLabel,
 } from '../components/chart-components';
 import {
   ChartContainer,
@@ -31,129 +32,106 @@ const itemVariants: Variants = {
   },
 };
 
-const useStorageLayout = (data: StorageInfo, config: Config) => {
-  const override = config.override;
+const removeDuplicates = (arr: string[]): string => {
+  const amounts: Record<string, number> = {};
+  for (const el of arr) {
+    if (amounts[el]) amounts[el] = amounts[el] + 1;
+    else amounts[el] = 1;
+  }
 
-  return useMemo(
-    () =>
-      data.layout.reduce(
-        (acc, curr, i) => {
-          const existing = acc.find(
-            o =>
-              curr.raidGroup != null &&
-              curr.raidGroup !== '' &&
-              o.raidGroup === curr.raidGroup
-          );
-
-          if (existing) {
-            existing.brands = [
-              ...existing.brands,
-              override.storage_brands[i] ?? curr.brand,
-            ];
-            existing.types = [
-              ...existing.types,
-              override.storage_types[i] ?? curr.type,
-            ];
-          } else {
-            acc.push({
-              brands: [override.storage_brands[i] ?? curr.brand],
-              types: [override.storage_types[i] ?? curr.type],
-              size: override.storage_sizes[i] ?? curr.size,
-              raidGroup: curr.raidGroup,
-              virtual: curr.virtual,
-            });
-          }
-
-          return acc;
-        },
-        [] as {
-          brands: string[];
-          types: string[];
-          size: number;
-          raidGroup?: string;
-          virtual?: boolean;
-        }[]
-      ),
-    [
-      data.layout,
-      override.storage_brands,
-      override.storage_sizes,
-      override.storage_types,
-    ]
-  );
+  return Object.entries(amounts)
+    .map(([key, val]) => (val === 1 ? key : `${val}x ${key}`))
+    .join(', ');
 };
+
+const useDataWithOverrides = (data: StorageInfo, config: Config): StorageInfo =>
+  useMemo(
+    () =>
+      data.map(entry => {
+        const sizeDevice = entry.disks.find(
+          disk => config.override.storage_sizes[disk.device] != null
+        )?.device;
+
+        return {
+          ...entry,
+          size: sizeDevice
+            ? config.override.storage_sizes[sizeDevice]
+            : entry.size,
+          disks: entry.disks.map(disk => ({
+            ...disk,
+            brand: config.override.storage_brands[disk.device] ?? disk.brand,
+            type: config.override.storage_types[disk.device] ?? disk.type,
+          })),
+        };
+      }),
+    [data, config]
+  );
 
 type StorageChartProps = {
   load?: StorageLoad;
+  index?: number;
   data: StorageInfo;
   config: Config;
   multiView: boolean;
   showPercentages: boolean;
+  textOffset?: string;
+  textSize?: string;
 };
 export const StorageChart: FC<StorageChartProps> = ({
   load,
+  index,
   data,
   config,
   multiView,
   showPercentages,
+  textOffset,
+  textSize,
 }) => {
   const theme = useTheme();
-  const layout = useStorageLayout(data, config);
-  const layoutNoVirtual = layout.filter(l => !l.virtual);
 
-  const totalSize = Math.max(
-    layoutNoVirtual.reduce((acc, s) => (acc = acc + s.size), 0),
-    1
-  );
-  const totalAvailable = Math.max(
-    totalSize -
-      (load?.layout
-        .slice(0, layoutNoVirtual.length)
-        .reduce((acc, { load }) => acc + load, 0) ?? 0),
-    1
-  );
-  const totalUsed = totalSize - totalAvailable;
+  const shownData = useDataWithOverrides(data, config);
+  const layoutNoVirtual = shownData.filter(l => !l.virtual);
+  const loadNoVirtual = load?.slice(0, layoutNoVirtual.length) ?? [];
 
-  const usageArr = layout
-    .reduce(
-      (acc, curr, i) => {
-        const diskLoad = load?.layout[i]?.load ?? 0;
-        const diskSize = curr.size;
+  const totalSize = layoutNoVirtual.reduce((acc, s) => (acc = acc + s.size), 0);
+  const totalUsed =
+    loadNoVirtual.reduce((acc, curr) => acc + (curr >= 0 ? curr : 0), 0) ?? 0;
+  const totalInvalid =
+    loadNoVirtual.reduce(
+      (acc, curr, i) => acc + (curr === -1 ? layoutNoVirtual[i].size : 0),
+      0
+    ) ?? 0;
+  const totalAvailable = Math.max(0, totalSize - totalUsed - totalInvalid);
 
-        const existing = acc.find(
-          o =>
-            curr.raidGroup != null &&
-            curr.raidGroup !== '' &&
-            o.raidGroup === curr.raidGroup
-        );
+  const usageArr = useMemo(() => {
+    if (!multiView) return [];
 
-        if (existing) {
-          existing.used = existing.used + diskLoad;
-        } else {
-          acc.push({
-            used: diskLoad,
-            available: diskSize - diskLoad,
-          });
-        }
-
-        return acc;
-      },
-      [] as {
-        raidGroup?: string;
-        used: number;
-        available: number;
-      }[]
-    )
-    .map(({ used, available }) => {
-      const usedPercent = Math.min(used / (used + available), 100);
+    return shownData.map((d, i) => {
+      const invalid = load?.[i] === -1;
+      const used = invalid ? 0 : load?.[i] ?? 0;
+      const available = d.size - used;
+      const realPercent = used / d.size,
+        usedPercent = Math.min(realPercent, 1);
 
       return {
         used,
+        invalid,
         available,
-        usedPercent: usedPercent,
+        realPercent,
+        usedPercent,
         availablePercent: 1 - usedPercent,
       };
     });
+  }, [shownData, load, multiView]);
+
+  const activeUsageArr =
+    index != null
+      ? usageArr.slice(
+          index * config.storage_widget_items_per_page,
+          index * config.storage_widget_items_per_page +
+            config.storage_widget_items_per_page
+        )
+      : usageArr;
 
   return (
     <MultiChartContainer layout>
@@ -169,23 +147,28 @@ export const StorageChart: FC<StorageChartProps> = ({
             <DefaultVertBarChart
               width={size.width}
               height={size.height}
-              data={usageArr}
+              data={activeUsageArr}
               tooltipRenderer={x => {
                 const value = x.payload?.[0]?.payload as
-                  | typeof usageArr[0]
+                  | (typeof usageArr)[0]
                   | undefined;
+
+                if (!value) {
+                  return <ThemedText>? % Used</ThemedText>;
+                }
+
+                if (value.invalid)
+                  return <ThemedText>No mount found</ThemedText>;
 
                 return (
                   <>
                     <ThemedText>
-                      {value ? (value.usedPercent * 100).toFixed(1) : 0} % Used
+                      {(value.realPercent * 100).toFixed(1)} % Used
                     </ThemedText>
 
                     <ThemedText>
-                      {bytePrettyPrint(value?.used ?? 0)} /{' '}
-                      {bytePrettyPrint(
-                        (value?.available ?? 0) + (value?.used ?? 0)
-                      )}
+                      {bytePrettyPrint(value.used)} /{' '}
+                      {bytePrettyPrint(value.available + value.used)}
                     </ThemedText>
                   </>
                 );
@@ -197,15 +180,52 @@ export const StorageChart: FC<StorageChartProps> = ({
                 fill={theme.colors.storagePrimary}
                 style={{ stroke: theme.colors.surface, strokeWidth: 4 }}
                 radius={10}
-              />
+                isAnimationActive={!showPercentages}
+              >
+                {showPercentages && (
+                  <LabelList
+                    position='insideLeft'
+                    offset={15}
+                    dataKey='realPercent'
+                    content={
+                      <VertBarStartLabel
+                        labelRenderer={value =>
+                          `%: ${(value * 100).toFixed(1)}`
+                        }
+                      />
+                    }
+                  />
+                )}
+              </Bar>
               <Bar
                 dataKey='availablePercent'
                 stackId='stack'
-                fill={theme.colors.text}
-                style={{ stroke: theme.colors.surface, strokeWidth: 4 }}
                 opacity={0.2}
                 radius={10}
-              />
+              >
+                {activeUsageArr.map((entry, index) => (
+                  <Cell
+                    fill={
+                      entry.invalid ? theme.colors.surface : theme.colors.text
+                    }
+                    style={
+                      entry.invalid
+                        ? {
+                            //TODO: Find out how to make the stroke width inset
+                            stroke: theme.colors.text,
+                            strokeWidth: 2,
+                            paintOrder: 'fill',
+                            strokeDasharray: '10',
+                          }
+                        : {
+                            stroke: theme.colors.surface,
+                            strokeWidth: 4,
+                          }
+                    }
+                    key={`cell-${index}`}
+                  />
+                ))}
+              </Bar>
             </DefaultVertBarChart>
           )}
         ></ChartContainer>
@@ -213,9 +233,11 @@ export const StorageChart: FC<StorageChartProps> = ({
         <ChartContainer
           textLeft={
             showPercentages
-              ? `%: ${(((totalUsed ?? 1) / (totalSize ?? 1)) * 100).toFixed(1)}`
+              ? `%: ${((totalUsed / totalSize) * 100).toFixed(1)}`
               : undefined
           }
+          textOffset={textOffset}
+          textSize={textSize}
           variants={itemVariants}
           initial='initial'
           animate='animate'
@@ -232,6 +254,10 @@ export const StorageChart: FC<StorageChartProps> = ({
                 {
                   name: 'Free',
                   value: totalAvailable,
+                },
+                {
+                  name: 'No mount found',
+                  value: totalInvalid,
                 },
               ]}
               width={size.width}
@@ -260,6 +286,19 @@ export const StorageChart: FC<StorageChartProps> = ({
                   transition: 'all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 }}
               />
+              <Cell
+                key='cell-invalid'
+                fill={theme.colors.surface}
+                style={{
+                  //TODO: Find out how to make the stroke width inset
+                  stroke: theme.colors.text,
+                  strokeWidth: 2,
+                  paintOrder: 'fill',
+                  strokeDasharray: '10',
+                  transition: 'all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                }}
+                opacity={0.2}
+              />
             </DefaultPieChart>
           )}
         ></ChartContainer>
@@ -281,68 +320,81 @@ export const StorageWidget: FC<StorageWidgetProps> = ({
 }) => {
   const theme = useTheme();
   const isMobile = useIsMobile();
-  const layout = useStorageLayout(data, config).filter(s => !s.virtual);
+  const [page, setPage] = useState(0);
 
   const [splitView, setSplitView] = useSetting('splitStorage', false);
-  const canHaveSplitView =
-    data.layout.length > 1 && config.enable_storage_split_view;
+  const shownData = useDataWithOverrides(data, config);
+  const canHaveSplitView = shownData.length > 1;
 
   const infos = useMemo(() => {
-    if (layout.length > 1) {
-      return layout.map(s => {
-        const brand = s.brands.map((b, i) => `${b} ${s.types[i]}`).join(', ');
+    if (shownData.length > 1) {
+      const brandShown = config.storage_label_list.includes('brand');
+      const typeShown = config.storage_label_list.includes('type');
+      const sizeShown = config.storage_label_list.includes('size');
+      const raidShown = config.storage_label_list.includes('raid');
+
+      return shownData.map(s => {
+        const brand = s.virtual
+          ? s.disks[0].brand
+          : removeDuplicates(
+              s.disks.map(d =>
+                [
+                  brandShown ? d.brand : undefined,
+                  typeShown ? d.type : undefined,
+                ]
+                  .filter(x => x)
+                  .join(' ')
+              )
+            );
         const size = s.size;
-        const raidGroup = s.raidGroup;
+        const raidGroup = s.raidLabel;
 
         return {
-          label: raidGroup ? `RAID\n=> ${raidGroup}` : 'Drive',
-          value: `${brand}\n=> ${bytePrettyPrint(size)}`,
+          label: s.virtual
+            ? 'VIRT'
+            : raidGroup
+            ? `RAID${raidShown ? `\n=> ${raidGroup}` : ''}`
+            : 'Drive',
+          value: [
+            brandShown || typeShown ? brand : undefined,
+            sizeShown ? bytePrettyPrint(size) : undefined,
+          ]
+            .filter(x => x)
+            .join('\n=> '),
         };
       });
     } else {
-      const brand = layout[0]?.brands.join(', ');
-      const size = layout[0]?.size;
-      const type = layout[0]?.types.join(', ');
-      const isRaid = layout[0]?.raidGroup != null;
+      const brand = removeDuplicates(
+        shownData[0]?.disks?.map(({ brand }) => brand)
+      );
+      const size = shownData[0]?.size;
+      const type = removeDuplicates(
+        shownData[0]?.disks?.map(({ type }) => type)
+      );
+      const isRaid = shownData[0]?.raidLabel != null;
 
       return toInfoTable(
         isRaid
           ? config.storage_label_list
           : config.storage_label_list.filter(x => x !== 'raid'),
         {
-          brand: (layout[0]?.brands.length ?? 0) > 1 ? 'Brands' : 'Brand',
-          size: 'Size',
-          type: (layout[0]?.types.length ?? 0) > 1 ? 'Types' : 'Type',
-          raid: 'Raid',
-        },
-        [
-          {
-            key: 'brand',
-            value: brand,
-          },
-          {
-            key: 'size',
-            value: size ? bytePrettyPrint(size) : '',
-          },
-          {
-            key: 'type',
-            value: type,
-          },
-          {
-            key: 'raid',
-            value: layout[0]?.raidGroup,
-          },
-        ]
+          brand: { label: 'Brand', value: brand },
+          size: { label: 'Size', value: size ? bytePrettyPrint(size) : '' },
+          type: { label: 'Type', value: type },
+          raid: { label: 'Raid', value: shownData[0]?.raidLabel },
+        }
       );
     }
-  }, [config.storage_label_list, layout]);
+  }, [config.storage_label_list, shownData]);
 
   return (
     <HardwareInfoContainer
       color={theme.colors.storagePrimary}
       heading='Storage'
       infos={infos}
-      infosPerPage={layout.length > 1 ? 3 : 7}
+      infosPerPage={
+        shownData.length > 1 ? config.storage_widget_items_per_page : 7
+      }
       icon={faHdd}
       extraContent={
         canHaveSplitView ? (
@@ -353,10 +405,12 @@ export const StorageWidget: FC<StorageWidgetProps> = ({
           />
         ) : undefined
       }
+      onPageChange={setPage}
     >
       <StorageChart
         showPercentages={config.always_show_percentages || isMobile}
         load={load}
+        index={page}
         config={config}
         data={data}
         multiView={canHaveSplitView && splitView}

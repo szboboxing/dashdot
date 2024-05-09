@@ -1,8 +1,9 @@
 # BASE #
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 WORKDIR /app
 ARG TARGETPLATFORM
+ENV DASHDOT_IMAGE=base
 ENV DASHDOT_RUNNING_IN_DOCKER=true
 
 RUN \
@@ -10,6 +11,7 @@ RUN \
   apk update &&\
   apk --no-cache add \
     lsblk \
+    mdadm \
     dmidecode \
     util-linux \
     lm-sensors \
@@ -18,23 +20,20 @@ RUN \
     then \
       /bin/echo ">> installing dependencies (amd64)" &&\
       wget -qO- https://install.speedtest.net/app/cli/ookla-speedtest-1.1.1-linux-x86_64.tgz \
-        | tar xmoz -C /usr/bin speedtest &&\
-      speedtest --accept-license --accept-gdpr > /dev/null; \
+        | tar xmoz -C /usr/bin speedtest; \
   elif [ "$TARGETPLATFORM" = "linux/arm64" ] || [ "$(uname -m)" = "aarch64" ]; \
     then \
       /bin/echo ">> installing dependencies (arm64)" &&\
       wget -qO- https://install.speedtest.net/app/cli/ookla-speedtest-1.1.1-linux-aarch64.tgz \
         | tar xmoz -C /usr/bin speedtest &&\
-      speedtest --accept-license --accept-gdpr > /dev/null &&\
       apk --no-cache add raspberrypi; \
   elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; \
     then \
       /bin/echo ">> installing dependencies (arm/v7)" &&\
       wget -qO- https://install.speedtest.net/app/cli/ookla-speedtest-1.1.1-linux-armhf.tgz \
         | tar xmoz -C /usr/bin speedtest &&\
-      speedtest --accept-license --accept-gdpr > /dev/null &&\
       apk --no-cache add raspberrypi; \
-  else echo "Unsupported platform"; exit 1; \
+  else /bin/echo "Unsupported platform"; exit 1; \
   fi
 
 # DEV #
@@ -55,6 +54,8 @@ FROM base as build
 ARG BUILDHASH
 ARG VERSION
 
+ENV NX_DAEMON=false
+
 RUN \
   /bin/echo -e ">> installing dependencies (build)" &&\
   apk --no-cache add \
@@ -68,19 +69,23 @@ RUN \
 COPY . ./
 
 RUN \
-  yarn &&\
-  yarn build:prod
+  yarn --immutable --immutable-cache &&\
+  yarn build:prod &&\
+  node scripts/strip_package_json.js
 
 # PROD #
 FROM base as prod
 
 EXPOSE 3001
 
-COPY --from=build /app/package.json .
 COPY --from=build /app/version.json .
-COPY --from=build /app/.yarn/releases/ .yarn/releases/
-COPY --from=build /app/dist/apps/api dist/apps/api
+COPY --from=build /app/.yarn/releases .yarn/releases
+COPY --from=build /app/.yarnrc.yml .yarnrc.yml
+COPY --from=build /app/dist/apps/server dist/apps/server
 COPY --from=build /app/dist/apps/cli dist/apps/cli
 COPY --from=build /app/dist/apps/view dist/apps/view
+COPY --from=build /app/dist/package.json package.json
 
-CMD ["yarn", "start"]
+RUN yarn
+
+CMD ["node", "."]

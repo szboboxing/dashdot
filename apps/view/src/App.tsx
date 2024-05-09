@@ -1,8 +1,9 @@
+import { ConfigProvider } from 'antd';
 import { FC, useMemo } from 'react';
 import {
-  createGlobalStyle,
   DefaultTheme,
   ThemeProvider,
+  createGlobalStyle,
 } from 'styled-components';
 import { useColorScheme } from 'use-color-scheme';
 import { MainWidgetContainer } from './components/main-widget-container';
@@ -52,15 +53,13 @@ const GlobalStyle = createGlobalStyle<{ noBg: boolean }>`
   body {
     background-color: ${({ theme, noBg }) =>
       noBg ? 'transparent' : theme.colors.background};
-
-    --ant-primary-color: ${({ theme }) => theme.colors.primary};
-    --ant-primary-color-hover: ${({ theme }) => theme.colors.primary};
+    height: 100vh;
+    width: 100vw;
   }
 
   #root {
-    overflow-x: hidden;
     width: 100%;
-    min-height: 100vh;
+    height: 100%;
 
     background: ${({ theme, noBg }) =>
       noBg
@@ -78,25 +77,17 @@ const GlobalStyle = createGlobalStyle<{ noBg: boolean }>`
     background-image: unset;
   }
 
-  .ant-switch-checked {
-    background: var(--ant-primary-color);
-  }
-
   .ant-btn {
     background: ${({ theme }) => theme.colors.background};
     border: none;
-
-    &:hover, &:focus, &:active {
-      background: var(--ant-primary-color);
-    }
   }
 `;
 
 const overrideColor = (
-  colors: typeof darkTheme['colors'],
+  colors: (typeof darkTheme)['colors'],
   query: ReturnType<typeof useQuery>
 ) => {
-  if (query.isSingleGraphMode) {
+  if (query.singleWidget) {
     if (query.overrideThemeColor) {
       colors.cpuPrimary = `#${query.overrideThemeColor}`;
       colors.storagePrimary = `#${query.overrideThemeColor}`;
@@ -120,7 +111,7 @@ export const App: FC = () => {
   const theme = useMemo(() => {
     const baseTheme = darkMode ? darkTheme : lightTheme;
 
-    if (query.isSingleGraphMode) {
+    if (query.singleWidget) {
       const queryTheme = query.overrideTheme
         ? query.overrideTheme === 'dark'
           ? darkTheme
@@ -136,14 +127,19 @@ export const App: FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <MobileContextProvider>
-        {query.isSingleGraphMode ? (
-          <SingleWidgetChart />
-        ) : (
-          <MainWidgetContainer />
-        )}
-      </MobileContextProvider>
-      <GlobalStyle noBg={query.isSingleGraphMode} />
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: theme.colors.primary,
+            colorPrimaryHover: theme.colors.primary,
+          },
+        }}
+      >
+        <MobileContextProvider>
+          {query.singleWidget ? <SingleWidgetChart /> : <MainWidgetContainer />}
+        </MobileContextProvider>
+      </ConfigProvider>
+      <GlobalStyle noBg={query.singleWidget} />
     </ThemeProvider>
   );
 };

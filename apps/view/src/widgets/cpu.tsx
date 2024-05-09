@@ -54,16 +54,20 @@ type CpuChartProps = {
   config: Config;
   multiView: boolean;
   showPercentages: boolean;
+  textOffset?: string;
+  textSize?: string;
 };
 export const CpuChart: FC<CpuChartProps> = ({
   load,
   config,
   multiView,
   showPercentages,
+  textOffset,
+  textSize,
 }) => {
   const theme = useTheme();
 
-  const latestLoad = load[load.length - 1];
+  const latestLoad = load.at(-1) ?? [];
   const columns = getColumnsForCores(latestLoad?.length ?? 1);
   let chartData: ChartVal[][] = [];
 
@@ -107,9 +111,13 @@ export const CpuChart: FC<CpuChartProps> = ({
 
     chartData = [chartValues];
   }
-  const averageTemp =
+  const averageTemp = () =>
     latestLoad?.reduce((acc, { temp }) => acc + (temp ?? 0), 0) /
     latestLoad?.length;
+  const maxTemp = () =>
+    Math.max(...(latestLoad?.map(({ temp }) => temp ?? 0) ?? []));
+
+  const finalTemp = config.cpu_temps_mode === 'max' ? maxTemp() : averageTemp();
 
   return (
     <MultiChartContainer
@@ -137,19 +145,21 @@ export const CpuChart: FC<CpuChartProps> = ({
               : undefined
           }
           textLeft={
-            multiView || !showPercentages
-              ? undefined
-              : `%: ${((chart.at(-1)?.y as number) ?? 0)?.toFixed(1)}`
+            showPercentages && !multiView
+              ? `%: ${((chart.at(-1)?.y as number) ?? 0)?.toFixed(1)}`
+              : undefined
           }
           textRight={
-            config.enable_cpu_temps && !multiView && chart.length > 1
-              ? `Ø: ${
+            config.enable_cpu_temps && chart.length > 1 && !multiView
+              ? `${
                   (config.use_imperial
-                    ? celsiusToFahrenheit(averageTemp).toFixed(1)
-                    : averageTemp.toFixed(1)) || '?'
+                    ? celsiusToFahrenheit(finalTemp).toFixed(1)
+                    : finalTemp.toFixed(1)) || '?'
                 } ${config.use_imperial ? '°F' : '°C'}`
               : undefined
           }
+          textOffset={textOffset}
+          textSize={textSize}
           renderChart={size => (
             <DefaultAreaChart
               data={chart}
@@ -178,58 +188,51 @@ export const CpuWidget: FC<CpuWidgetProps> = ({ load, data, config }) => {
   const isMobile = useIsMobile();
   const override = config.override;
 
-  const [multiCore, setMulticore] = useSetting('multiCore', false);
+  const [multiCore, setMultiCore] = useSetting('multiCore', false);
+  const showToggle = config.cpu_cores_toggle_mode === 'toggle';
+  const showMultiCore =
+    config.cpu_cores_toggle_mode === 'multi-core'
+      ? true
+      : config.cpu_cores_toggle_mode === 'average'
+      ? false
+      : multiCore;
   const frequency = override.cpu_frequency ?? data.frequency;
 
   return (
     <HardwareInfoContainer
       color={theme.colors.cpuPrimary}
       heading='Processor'
-      infos={toInfoTable(
-        config.cpu_label_list,
-        {
-          brand: 'Brand',
-          model: 'Model',
-          cores: 'Cores',
-          threads: 'Threads',
-          frequency: 'Frequency',
+      infos={toInfoTable(config.cpu_label_list, {
+        brand: { label: 'Brand', value: override.cpu_brand ?? data.brand },
+        model: { label: 'Model', value: override.cpu_model ?? data.model },
+        cores: {
+          label: 'Cores',
+          value: (override.cpu_cores ?? data.cores)?.toString(),
         },
-        [
-          {
-            key: 'brand',
-            value: override.cpu_brand ?? data.brand,
-          },
-          {
-            key: 'model',
-            value: override.cpu_model ?? data.model,
-          },
-          {
-            key: 'cores',
-            value: (override.cpu_cores ?? data.cores)?.toString(),
-          },
-          {
-            key: 'threads',
-            value: (override.cpu_threads ?? data.threads)?.toString(),
-          },
-          {
-            key: 'frequency',
-            value: frequency ? `${frequency} GHz` : '',
-          },
-        ]
-      )}
+        threads: {
+          label: 'Threads',
+          value: (override.cpu_threads ?? data.threads)?.toString(),
+        },
+        frequency: {
+          label: 'Frequency',
+          value: frequency ? `${frequency} GHz` : '',
+        },
+      })}
       infosPerPage={7}
       icon={faMicrochip}
       extraContent={
-        <WidgetSwitch
-          label='Show All Cores'
-          checked={multiCore}
-          onChange={() => setMulticore(!multiCore)}
-        />
+        showToggle ? (
+          <WidgetSwitch
+            label='Show All Cores'
+            checked={multiCore}
+            onChange={() => setMultiCore(!multiCore)}
+          />
+        ) : undefined
       }
     >
       <CpuChart
         showPercentages={config.always_show_percentages || isMobile}
-        multiView={multiCore}
+        multiView={showMultiCore}
         config={config}
         load={load}
       />

@@ -4,8 +4,8 @@
 </h1>
 
 <p align="center">
-  <a href="https://drone.mauz.io/MauriceNino/dashdot" target="_blank">
-    <img title="Drone" src="https://drone.mauz.io/api/badges/MauriceNino/dashdot/status.svg">
+  <a href="https://github.com/MauriceNino/dashdot/actions/workflows/deploy.yaml?branch=main" target="_blank">
+    <img title="GitHub Actions" src="https://github.com/MauriceNino/dashdot/actions/workflows/deploy.yaml/badge.svg?branch=main">
   </a>
 
   <a href="https://discord.gg/3teHFBNQ9W" target="_blank">
@@ -25,7 +25,7 @@
 </p>
 <br />
 <p align="center">
-  <a href="https://dash.mauz.io" target="_blank">Live Demo</a>
+  <a href="https://dash.mauz.dev" target="_blank">Live Demo</a>
  |
   <a href="https://hub.docker.com/r/mauricenino/dashdot" target="_blank">Docker Image</a>
 </p>
@@ -63,8 +63,8 @@ In case you want to financially support this project, you can visit my
 
 ## Documentation
 
-- [Installation Options](https://getdashdot.com/docs/install)
-- [Configuration Options](https://getdashdot.com/docs/config)
+- [Installation Options](https://getdashdot.com/docs/installation)
+- [Configuration Options](https://getdashdot.com/docs/configuration)
 - [Contributing](./.github/CONTRIBUTING.md)
 - [Changelog](./.github/CHANGELOG.md)
 
@@ -83,6 +83,6 @@ docker container run -it \
 
 To get more information on why which flag is needed, or if you want to use other
 install options instead (`docker-compose`, or from source), have a look at the
-[installation options](https://getdashdot.com/docs/install).
+[installation options](https://getdashdot.com/docs/installation).
 
-To read more about configuration options, you can visit the [configuration options](https://getdashdot.com/docs/config).
+To read more about configuration options, you can visit the [configuration options](https://getdashdot.com/docs/configuration).

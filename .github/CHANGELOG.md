@@ -1,3 +1,332 @@
+## [5.8.3](https://github.com/MauriceNino/dashdot/compare/v5.8.2...v5.8.3) (2024-01-23)
+
+
+### Bug Fixes
+
+* filter out autofs from sizes ([f7ac272](https://github.com/MauriceNino/dashdot/commit/f7ac2728b89a6c75502c9c736c46a94ff386889b))
+
+## [5.8.2](https://github.com/MauriceNino/dashdot/compare/v5.8.1...v5.8.2) (2024-01-21)
+
+## [5.8.1](https://github.com/MauriceNino/dashdot/compare/v5.8.0...v5.8.1) (2024-01-21)
+
+# [5.8.0](https://github.com/MauriceNino/dashdot/compare/v5.7.0...v5.8.0) (2024-01-21)
+
+
+### Features
+
+* add separate image for nvidia gpu support ([#1010](https://github.com/MauriceNino/dashdot/issues/1010)) ([319120d](https://github.com/MauriceNino/dashdot/commit/319120df3f636a7902e8ad1427264ec35db049fd)), closes [#290](https://github.com/MauriceNino/dashdot/issues/290)
+
+# [5.7.0](https://github.com/MauriceNino/dashdot/compare/v5.6.1...v5.7.0) (2024-01-19)
+
+
+### Features
+
+* add option to run speedtest at cron interval ([d05c39c](https://github.com/MauriceNino/dashdot/commit/d05c39ce62f5e7261c2c0f7c5102ae01651c0f4f)), closes [#889](https://github.com/MauriceNino/dashdot/issues/889)
+
+## [5.6.1](https://github.com/MauriceNino/dashdot/compare/v5.6.0...v5.6.1) (2024-01-19)
+
+
+### Bug Fixes
+
+* filter out ram sticks without a size ([0bf79fa](https://github.com/MauriceNino/dashdot/commit/0bf79fa28fe3889d6013af4c5a595015a29e9733))
+* use max cpu frequency for static data instead of current ([a1da8ad](https://github.com/MauriceNino/dashdot/commit/a1da8ad60d65f12023ccfab844efee2016ab74f7))
+
+# [5.6.0](https://github.com/MauriceNino/dashdot/compare/v5.5.2...v5.6.0) (2024-01-19)
+
+
+### Bug Fixes
+
+* change default version display to icon_hover ([fdc89a3](https://github.com/MauriceNino/dashdot/commit/fdc89a371c7dee449f08b737ca2547acafb83c31))
+
+
+### Features
+
+* add visual indication for disks with no valid mounts ([4f81ab6](https://github.com/MauriceNino/dashdot/commit/4f81ab60f105fbb9e21ab99f9c41a150e52bf50e)), closes [#1001](https://github.com/MauriceNino/dashdot/issues/1001)
+
+## [5.5.2](https://github.com/MauriceNino/dashdot/compare/v5.5.1...v5.5.2) (2024-01-18)
+
+
+### Bug Fixes
+
+* filter sizes array for only rw ones ([e031e35](https://github.com/MauriceNino/dashdot/commit/e031e35950c8eb92c2f8a3d2789f8a6447ba66c1)), closes [#1008](https://github.com/MauriceNino/dashdot/issues/1008)
+
+## [5.5.1](https://github.com/MauriceNino/dashdot/compare/v5.5.0...v5.5.1) (2024-01-09)
+
+
+### Bug Fixes
+
+* avoid adding pre-allocated space to lvm disks ([f1949b4](https://github.com/MauriceNino/dashdot/commit/f1949b474dca8a1b10883d45021ef9cbd0011cab))
+
+# [5.5.0](https://github.com/MauriceNino/dashdot/compare/v5.4.0...v5.5.0) (2024-01-07)
+
+
+### Features
+
+* add option DASHDOT_CPU_TEMPS_MODE to switch between max and avg cpu temp readings ([2ec1e0f](https://github.com/MauriceNino/dashdot/commit/2ec1e0f46c942404f834a9da2e097c2f434e19a2)), closes [#932](https://github.com/MauriceNino/dashdot/issues/932)
+
+# [5.4.0](https://github.com/MauriceNino/dashdot/compare/v5.3.2...v5.4.0) (2024-01-07)
+
+
+### Bug Fixes
+
+* add pre-allocated space of drive to current usage ([7f7050a](https://github.com/MauriceNino/dashdot/commit/7f7050a0b68b13e3526b8a2f8ac98a9090a1dd89)), closes [#882](https://github.com/MauriceNino/dashdot/issues/882)
+
+
+### Features
+
+* add custom scrollbar to main container ([9eacee2](https://github.com/MauriceNino/dashdot/commit/9eacee2da0e2b052538ec7b7c94da03e10e647cd)), closes [#922](https://github.com/MauriceNino/dashdot/issues/922)
+* add option DASHDOT_NETWORK_SPEED_AS_BYTES to switch network speed to bytes per second ([56bd9d8](https://github.com/MauriceNino/dashdot/commit/56bd9d839a48637c23ad9c6ed19524a8f9f33a1e)), closes [#930](https://github.com/MauriceNino/dashdot/issues/930)
+* add timestamp of last speedtest run on hover ([3c73ee4](https://github.com/MauriceNino/dashdot/commit/3c73ee4f93d9ceb3a5469d580fad4dce22dcda3f)), closes [#915](https://github.com/MauriceNino/dashdot/issues/915)
+
+## [5.3.2](https://github.com/MauriceNino/dashdot/compare/v5.3.1...v5.3.2) (2024-01-06)
+
+
+### Bug Fixes
+
+* dynamic storage info slow on windows ([#993](https://github.com/MauriceNino/dashdot/issues/993)) ([64655f1](https://github.com/MauriceNino/dashdot/commit/64655f1bf0db52e0a10051f9a3523b594ef148fd))
+
+## [5.3.1](https://github.com/MauriceNino/dashdot/compare/v5.3.0...v5.3.1) (2024-01-06)
+
+
+### Bug Fixes
+
+* filter out zram devices ([6d265d3](https://github.com/MauriceNino/dashdot/commit/6d265d3d58f217572da8967a2c6225e9278d7876)), closes [#981](https://github.com/MauriceNino/dashdot/issues/981)
+* refactor storage load gathering; remove outdated tests ([390def6](https://github.com/MauriceNino/dashdot/commit/390def62a029ad63a097afe8c33f0f35a599f7cf)), closes [#883](https://github.com/MauriceNino/dashdot/issues/883)
+
+# [5.3.0](https://github.com/MauriceNino/dashdot/compare/v5.2.3...v5.3.0) (2024-01-06)
+
+
+### Bug Fixes
+
+* add back and fix arm/v8 ([4284cf2](https://github.com/MauriceNino/dashdot/commit/4284cf204db8d3b51ee15e1b870d5be95fe20e72))
+* bundling third party modules with cli package ([156ec72](https://github.com/MauriceNino/dashdot/commit/156ec72ab81780a2a913b0c36bedd763cbebefd5))
+* lint not working for view ([5849edd](https://github.com/MauriceNino/dashdot/commit/5849edda33dc775ee0d49572322b8af1f5c70fd9))
+* remove arm/v7 for now ([0ba25cd](https://github.com/MauriceNino/dashdot/commit/0ba25cd7fe99c79faebd3b462ec5afb32e9a2e31))
+* remove arm/v8 for now ([6408997](https://github.com/MauriceNino/dashdot/commit/6408997bf74720615a3d45c68f093dcd8ca58456))
+* testing errors ([f2937fd](https://github.com/MauriceNino/dashdot/commit/f2937fd15c4ba064fcaabad87308bb31c71ebbcd))
+
+
+### Features
+
+* [gpu] allow to filter-out some controller ([9651122](https://github.com/MauriceNino/dashdot/commit/96511226e70c9c050cbd6efb67341d6ff5062bde))
+* **cpu widget:** allow user to switch (default) processor core view ([4def64e](https://github.com/MauriceNino/dashdot/commit/4def64ee0d340a2234ebf604b373dbb136b01abd))
+* render network and gpu widgets individually instead of as pair ([#886](https://github.com/MauriceNino/dashdot/issues/886)) ([df59729](https://github.com/MauriceNino/dashdot/commit/df597292478c0ddcfa185702c190c111be34a9a0))
+
+
+### Performance Improvements
+
+* fix windows cpu 100% usage ([9c23e93](https://github.com/MauriceNino/dashdot/commit/9c23e937130cc81fd2100928bfa17614c525133a))
+
+## [5.2.3](https://github.com/MauriceNino/dashdot/compare/v5.2.2...v5.2.3) (2023-08-23)
+
+## [5.2.2](https://github.com/MauriceNino/dashdot/compare/v5.2.1...v5.2.2) (2023-08-23)
+
+
+### Bug Fixes
+
+* **api:** calculation for cpus with E/P cores not working ([3386923](https://github.com/MauriceNino/dashdot/commit/33869236ae7dd45795d2d8200901f511f65cd054)), closes [#706](https://github.com/MauriceNino/dashdot/issues/706)
+* checksum for typescript ([6a14829](https://github.com/MauriceNino/dashdot/commit/6a1482931a2a0faa447a6f12f6777662588a403a))
+* **speedtest:** not working on windows install ([#731](https://github.com/MauriceNino/dashdot/issues/731)) ([423837b](https://github.com/MauriceNino/dashdot/commit/423837b2f957fe5736818fec4a4c2c113df28214)), closes [#729](https://github.com/MauriceNino/dashdot/issues/729)
+
+
+### Reverts
+
+* upgrade prism-react-renderer to v2 ([6d60009](https://github.com/MauriceNino/dashdot/commit/6d60009d5cf1e350a323a723613845c29b80ac25))
+
+## [5.2.1](https://github.com/MauriceNino/dashdot/compare/v5.2.0...v5.2.1) (2023-04-29)
+
+# [5.2.0](https://github.com/MauriceNino/dashdot/compare/v5.1.3...v5.2.0) (2023-04-29)
+
+
+### Bug Fixes
+
+* also hide hidden storage labels on multiple drives ([213b73e](https://github.com/MauriceNino/dashdot/commit/213b73e5692ae7d1bdef564f0c7d8ba8e4613b41)), closes [#716](https://github.com/MauriceNino/dashdot/issues/716)
+* dont crash on missing network interface speed ([c62ba63](https://github.com/MauriceNino/dashdot/commit/c62ba6395f7d34abccba579b8ed7111845023308)), closes [#715](https://github.com/MauriceNino/dashdot/issues/715) [#727](https://github.com/MauriceNino/dashdot/issues/727)
+* hide public ip, if not included in label list ([ccf7d12](https://github.com/MauriceNino/dashdot/commit/ccf7d12051cb24ed4220eab5f2ef85cf6b54f8ce)), closes [#690](https://github.com/MauriceNino/dashdot/issues/690)
+* **view:** remove not broadly supported ECMA Script features in the frontend ([5ba5ed2](https://github.com/MauriceNino/dashdot/commit/5ba5ed2ce501bac1b7ab2963c9bbd408c27177d7))
+
+
+### Features
+
+* allow adjusting of items per page in multi-drive storage widget ([54be449](https://github.com/MauriceNino/dashdot/commit/54be449be6351f157dfe9c72561854530da0252c))
+
+## [5.1.3](https://github.com/MauriceNino/dashdot/compare/v5.1.2...v5.1.3) (2023-04-03)
+
+## [5.1.2](https://github.com/MauriceNino/dashdot/compare/v5.1.1...v5.1.2) (2023-04-01)
+
+## [5.1.1](https://github.com/MauriceNino/dashdot/compare/v5.1.0...v5.1.1) (2023-03-24)
+
+
+### Bug Fixes
+
+* allow drive mappings via uuid ([44e87a8](https://github.com/MauriceNino/dashdot/commit/44e87a8fd82311e8f1efd7c8f8294f29f1408c16))
+
+# [5.1.0](https://github.com/MauriceNino/dashdot/compare/v5.0.0...v5.1.0) (2023-03-23)
+
+
+### Features
+
+* **view:** add options for showing dash version in UI ([57c4374](https://github.com/MauriceNino/dashdot/commit/57c4374b431088362585cb04c1d04f3dd3709668)), closes [#635](https://github.com/MauriceNino/dashdot/issues/635)
+
+# [5.0.0](https://github.com/MauriceNino/dashdot/compare/v4.9.1...v5.0.0) (2023-03-08)
+
+
+### Bug Fixes
+
+* disallow unclaimed space assignment when host drive is filtered ([997cec6](https://github.com/MauriceNino/dashdot/commit/997cec6ed5fe9e6244a71a894ae76f4d58f053bd))
+
+
+### Features
+
+* add new config vars to replace old storage overrides ([3199dbd](https://github.com/MauriceNino/dashdot/commit/3199dbd5197db3c4b21094d4209812183bc14c33))
+* add support for xfs based setups ([218d3e6](https://github.com/MauriceNino/dashdot/commit/218d3e6cbaddfa31854dbf3ceecf3ec7800b5579))
+* support raid 0 in storage widget ([634aed5](https://github.com/MauriceNino/dashdot/commit/634aed5ef1c45899c26b69f8cb60b860c59e48ab)), closes [#295](https://github.com/MauriceNino/dashdot/issues/295)
+
+
+### BREAKING CHANGES
+
+* storage layout changed, so config options will no longer work the way they did
+before
+
+## [4.9.1](https://github.com/MauriceNino/dashdot/compare/v4.9.0...v4.9.1) (2023-02-22)
+
+
+### Bug Fixes
+
+* **api:** fix possible size mismatch on root mount ([148c1df](https://github.com/MauriceNino/dashdot/commit/148c1df772fc0b1b93edefb8f9d2fff8271519d6)), closes [#594](https://github.com/MauriceNino/dashdot/issues/594)
+
+# [4.9.0](https://github.com/MauriceNino/dashdot/compare/v4.8.5...v4.9.0) (2023-02-08)
+
+
+### Features
+
+* **view:** add text size/offset parameters to widgets ([683d1e5](https://github.com/MauriceNino/dashdot/commit/683d1e5463bd9e19f1f53fa7687037cef347047c))
+
+## [4.8.5](https://github.com/MauriceNino/dashdot/compare/v4.8.4...v4.8.5) (2023-02-07)
+
+## [4.8.4](https://github.com/MauriceNino/dashdot/compare/v4.8.3...v4.8.4) (2023-02-05)
+
+## [4.8.3](https://github.com/MauriceNino/dashdot/compare/v4.8.2...v4.8.3) (2023-02-01)
+
+
+### Bug Fixes
+
+* **api:** allow storage widget to work with win32 from host ([e5b9670](https://github.com/MauriceNino/dashdot/commit/e5b96709919653541fb9c9d28ae7793c825692fc))
+* **api:** capitalize first letter in network type ([ad934e7](https://github.com/MauriceNino/dashdot/commit/ad934e70b4e802a2c11de874d4ac0332ced547a7))
+* **api:** infer SSD type from interfaceType ([6d9ddb6](https://github.com/MauriceNino/dashdot/commit/6d9ddb6021c38e0396146b015c2ea63a7c4b9961))
+* **api:** merge partitions in win32 ([8302df4](https://github.com/MauriceNino/dashdot/commit/8302df44a7650771d67ddd25fa116f4552f7c763))
+* **view:** display 1000 Mb/s as 1 Gb/s ([a36aff0](https://github.com/MauriceNino/dashdot/commit/a36aff0b039b256bb9b4e1853ef2a1cc71f32da7))
+* **view:** enable storage split-view by default ([7f5186e](https://github.com/MauriceNino/dashdot/commit/7f5186e8d21dfb6fb2c7f1108d1fb5291d89da7e))
+* **view:** show unknown for disk vendor on multi-disk view ([93c7b1a](https://github.com/MauriceNino/dashdot/commit/93c7b1a8a2a1fabff6c449957990117a9fcec875))
+
+## [4.8.2](https://github.com/MauriceNino/dashdot/compare/v4.8.1...v4.8.2) (2023-01-29)
+
+## [4.8.1](https://github.com/MauriceNino/dashdot/compare/v4.8.0...v4.8.1) (2023-01-29)
+
+
+### Bug Fixes
+
+* **view:** allow chart labels to break line ([72443d2](https://github.com/MauriceNino/dashdot/commit/72443d20855f93cfe99bab8045cfb2bc9f41b2ae))
+
+# [4.8.0](https://github.com/MauriceNino/dashdot/compare/v4.7.0...v4.8.0) (2023-01-29)
+
+
+### Features
+
+* add option to read speed-test result from file ([006dd6f](https://github.com/MauriceNino/dashdot/commit/006dd6f9b7e397dd350421b9ad1edae0ee881482)), closes [#558](https://github.com/MauriceNino/dashdot/issues/558)
+
+# [4.7.0](https://github.com/MauriceNino/dashdot/compare/v4.6.1...v4.7.0) (2023-01-27)
+
+
+### Bug Fixes
+
+* add missing accessibility options ([f677f2f](https://github.com/MauriceNino/dashdot/commit/f677f2f0d55ac0ae388a443131d38db4fa2f2936))
+* add source map for easier debugging in prod ([f4d141e](https://github.com/MauriceNino/dashdot/commit/f4d141ef3f7b9cab83a26565bac604aa2a301157))
+
+
+### Features
+
+* add server side compression and add font locally ([7cb2ffc](https://github.com/MauriceNino/dashdot/commit/7cb2ffcd13d793de8eafe3d50a52959411f00c40)), closes [#549](https://github.com/MauriceNino/dashdot/issues/549)
+* set cache control headers ([ac12981](https://github.com/MauriceNino/dashdot/commit/ac12981fcbee33a7daa448df1e8f1349e0e8145f)), closes [#549](https://github.com/MauriceNino/dashdot/issues/549)
+
+## [4.6.1](https://github.com/MauriceNino/dashdot/compare/v4.6.0...v4.6.1) (2023-01-06)
+
+
+### Bug Fixes
+
+* **api:** also filter disks by fs type filter ([0a97265](https://github.com/MauriceNino/dashdot/commit/0a97265796196d111c048e902c4457aa2a850b90))
+* **api:** remove appendix from raid label when it is not a dupe ([23bbc05](https://github.com/MauriceNino/dashdot/commit/23bbc05625d7a1dd8536fc568d0353e63b4d2a2f)), closes [#514](https://github.com/MauriceNino/dashdot/issues/514)
+* **api:** removed host size from unassigned sizes ([e462e28](https://github.com/MauriceNino/dashdot/commit/e462e286b41dafb2506d0a403a72cb455e1e6b18)), closes [#514](https://github.com/MauriceNino/dashdot/issues/514)
+* **cli:** add instructions and formatting for cli output ([ae79e62](https://github.com/MauriceNino/dashdot/commit/ae79e62e8f00b6687acefe9fa21525edbb780871))
+* **view:** cap storage graphs at 100% (visually) ([453a94b](https://github.com/MauriceNino/dashdot/commit/453a94b7cb93fba4f60f2ccc44464f0df5571245))
+
+# [4.6.0](https://github.com/MauriceNino/dashdot/compare/v4.5.7...v4.6.0) (2022-12-31)
+
+
+### Bug Fixes
+
+* add mdadm to docker container for RAID info ([574aa41](https://github.com/MauriceNino/dashdot/commit/574aa418f2626f2f551e5b0dac55c45c8744bd5c))
+* remove arm v7 from build ([04e1463](https://github.com/MauriceNino/dashdot/commit/04e146395200d43d2de6f20aeb907035387e1807))
+* **view:** antd upgrade errors ([130e15b](https://github.com/MauriceNino/dashdot/commit/130e15b71c32c1587d7e1d217e206ff6342ab2ca))
+* **view:** errors for transient props in styled-components ([599e968](https://github.com/MauriceNino/dashdot/commit/599e968c22b2efdbf40eaabc4f6b332a0b588724))
+
+
+### Features
+
+* **view:** add option for custom host ([01d35e0](https://github.com/MauriceNino/dashdot/commit/01d35e061a58d25658d240acc1556c97c6d12b58)), closes [#496](https://github.com/MauriceNino/dashdot/issues/496)
+
+## [4.5.7](https://github.com/MauriceNino/dashdot/compare/v4.5.6...v4.5.7) (2022-11-17)
+
+## [4.5.6](https://github.com/MauriceNino/dashdot/compare/v4.5.5...v4.5.6) (2022-11-13)
+
+## [4.5.5](https://github.com/MauriceNino/dashdot/compare/v4.5.4...v4.5.5) (2022-11-13)
+
+
+### Bug Fixes
+
+* **api:** remove broken universal-speedtest to avoid confusion ([0f5e785](https://github.com/MauriceNino/dashdot/commit/0f5e7855e2be1187e1bed7de0630370f3fb31516))
+* **view:** show virtual mounts as "disk" in widget ([0263a16](https://github.com/MauriceNino/dashdot/commit/0263a160ae10b97e7f1b2eb0e992d20e9424df99)), closes [#384](https://github.com/MauriceNino/dashdot/issues/384)
+
+## [4.5.4](https://github.com/MauriceNino/dashdot/compare/v4.5.3...v4.5.4) (2022-11-13)
+
+
+### Bug Fixes
+
+* **speedtest-cli:** avoid speedtest DNS error ([bc0e9f5](https://github.com/MauriceNino/dashdot/commit/bc0e9f50979e7dfc09296d843c046324807a5eee))
+
+## [4.5.3](https://github.com/MauriceNino/dashdot/compare/v4.5.2...v4.5.3) (2022-10-13)
+
+## [4.5.2](https://github.com/MauriceNino/dashdot/compare/v4.5.1...v4.5.2) (2022-09-18)
+
+
+### Bug Fixes
+
+* **view:** storage multi-view sizing + text ([afb66c4](https://github.com/MauriceNino/dashdot/commit/afb66c4801e68076ad4562ba67636f05120f9e9a))
+
+## [4.5.1](https://github.com/MauriceNino/dashdot/compare/v4.5.0...v4.5.1) (2022-09-18)
+
+
+### Bug Fixes
+
+* **view:** label not breaking correctly when green bar is too small ([1cd5e7b](https://github.com/MauriceNino/dashdot/commit/1cd5e7b65f1f6b57eddf4c41a5b89b30752cc498))
+* **view:** show all storage options in widget mode ([6b969c3](https://github.com/MauriceNino/dashdot/commit/6b969c3ab4a21788de5f19b4038b5e995ebbb566)), closes [#385](https://github.com/MauriceNino/dashdot/issues/385)
+
+# [4.5.0](https://github.com/MauriceNino/dashdot/compare/v4.4.0...v4.5.0) (2022-09-17)
+
+
+### Bug Fixes
+
+* **api:** bad group matching when raid labels have different endings ([db8d49f](https://github.com/MauriceNino/dashdot/commit/db8d49f1d790993f2ad49a9572fb2df9288f3183)), closes [#295](https://github.com/MauriceNino/dashdot/issues/295)
+* **api:** error when host drive partition has no correct host mount ([1e49d4c](https://github.com/MauriceNino/dashdot/commit/1e49d4c4941b5c052abf77233c1e7f255c5eff58)), closes [#369](https://github.com/MauriceNino/dashdot/issues/369)
+* **api:** storage widget not working on from source installation ([0ab0f66](https://github.com/MauriceNino/dashdot/commit/0ab0f663e30a88990cdec76511b5ee8d9d008f2e))
+* **view:** drive not picking correct sizes in raid mode ([8bfc576](https://github.com/MauriceNino/dashdot/commit/8bfc57608d5b6c57aad4a58310427c53e4c597c7)), closes [#295](https://github.com/MauriceNino/dashdot/issues/295)
+
+
+### Features
+
+* **api:** add option to filter storage devices by name ([5eb6efb](https://github.com/MauriceNino/dashdot/commit/5eb6efb77fba59144722cb83e410523785fa290f)), closes [#314](https://github.com/MauriceNino/dashdot/issues/314)
+* **view:** add percentage labels to storage split view ([718eb6b](https://github.com/MauriceNino/dashdot/commit/718eb6beafc0cfb9b41f2e5693d531df32c8729d)), closes [#370](https://github.com/MauriceNino/dashdot/issues/370)
+
 # [4.4.0](https://github.com/MauriceNino/dashdot/compare/v4.3.10...v4.4.0) (2022-08-28)
 
 

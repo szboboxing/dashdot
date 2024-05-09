@@ -1,4 +1,4 @@
-import { Config, OsInfo } from '@dash/common';
+import { Config, OsInfo, Transient } from '@dash/common';
 import {
   faApple,
   faCentos,
@@ -16,7 +16,7 @@ import {
   FontAwesomeIcon,
   FontAwesomeIconProps,
 } from '@fortawesome/react-fontawesome';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { fromUrl, parseDomain, ParseResultType } from 'parse-domain';
 import { toUnicode } from 'punycode';
 import { FC, useEffect, useMemo, useState } from 'react';
@@ -40,7 +40,6 @@ const Container = styled.div`
 
 const Heading = styled(ThemedText)`
   width: 100%;
-  max-width: 100%;
   margin-top: 31px;
   margin-bottom: 15px;
 
@@ -57,6 +56,7 @@ const Heading = styled(ThemedText)`
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+    padding-bottom: 5px;
   }
 `;
 
@@ -96,9 +96,9 @@ const Link = styled(Button)`
   }
 `;
 
-const StyledInfoTable = styled(InfoTable)<{ mobile: boolean }>`
+const StyledInfoTable = styled(InfoTable)<Transient<{ mobile: boolean }>>`
   width: 100%;
-  padding: 15px 5px ${({ mobile }) => (mobile ? 15 : 5)}px 5px;
+  padding: 15px 5px ${({ $mobile }) => ($mobile ? 15 : 5)}px 5px;
 `;
 
 const SFontAwesomeIcon = styled(FontAwesomeIcon)`
@@ -180,7 +180,9 @@ export const ServerWidget: FC<ServerWidgetProps> = ({ data, config }) => {
     return () => clearInterval(interval);
   }, [data.uptime]);
 
-  const domain = useMemo(() => {
+  const host = useMemo(() => {
+    if (config?.custom_host) return config?.custom_host;
+
     const href = window.location.href;
     const result = parseDomain(fromUrl(href));
 
@@ -190,52 +192,38 @@ export const ServerWidget: FC<ServerWidgetProps> = ({ data, config }) => {
     } else {
       return undefined;
     }
-  }, []);
+  }, [config?.custom_host]);
 
-  const dateInfos = [
-    {
-      label: '',
-      value: `${days} days`,
-      amount: days,
-    },
-    {
-      label: '',
-      value: `${hours} hours`,
-      amount: hours,
-    },
-    {
-      label: '',
-      value: `${minutes} minutes`,
-      amount: minutes,
-    },
-  ].reduce(
-    (acc, cur) => ({
-      ...acc,
-      value: [acc.value, cur.amount || acc.value !== '' ? cur.value : undefined]
-        .join('\n')
-        .trim(),
-    }),
-    {
-      key: 'up_since',
-      value: '',
-    }
-  );
-
+  const uptimeStr =
+    (days ? `${days} days\n` : '') +
+    (hours ? `${hours} hours\n` : '') +
+    (minutes ? `${minutes} minutes` : '');
   const distro = data.distro;
   const platform = data.platform;
   const os = override.os ?? `${distro} ${data.release}`;
   const arch = override.arch ?? data.arch;
 
+  const ghBtn = (
+    <Link
+      ghost
+      shape='circle'
+      icon={<FontAwesomeIcon icon={faGithub} />}
+      href='https://github.com/MauriceNino/dashdot'
+      target='_blank'
+      aria-label='GitHub Link'
+    />
+  );
+
   return (
     <Container>
       <ButtonsContainer>
-        <Link
-          ghost
-          shape='circle'
-          icon={<FontAwesomeIcon icon={faGithub} />}
-          href='https://github.com/MauriceNino/dashdot'
-          target='_blank'
-        />
+        {config.show_dash_version === 'icon_hover' ? (
+          <Tooltip placement='right' title={data.dash_version}>
+            {ghBtn}
+          </Tooltip>
+        ) : (
+          ghBtn
+        )}
       </ButtonsContainer>
 
       <WidgetSwitch
@@ -245,10 +233,10 @@ export const ServerWidget: FC<ServerWidgetProps> = ({ data, config }) => {
       />
 
       <Heading>
-        {config?.show_host && domain ? (
+        {config?.show_host && host ? (
           <>
             <Appendix>dash.</Appendix>
-            <ServerName>{domain}</ServerName>
+            <ServerName>{host}</ServerName>
           </>
         ) : (
           <StandaloneAppendix>dash.</StandaloneAppendix>
@@ -256,26 +244,13 @@ export const ServerWidget: FC<ServerWidgetProps> = ({ data, config }) => {
       </Heading>
 
       <StyledInfoTable
-        mobile={isMobile}
-        infos={toInfoTable(
-          config.os_label_list,
-          {
-            os: 'OS',
-            arch: 'Arch',
-            up_since: 'Up since',
-          },
-          [
-            {
-              key: 'os',
-              value: os,
-            },
-            {
-              key: 'arch',
-              value: arch,
-            },
-            dateInfos,
-          ]
-        )}
+        $mobile={isMobile}
+        infos={toInfoTable(config.os_label_list, {
+          os: { label: 'OS', value: os },
+          arch: { label: 'Arch', value: arch },
+          up_since: { label: 'Up since', value: uptimeStr },
+          dash_version: { label: 'Dash Version', value: data.dash_version },
+        })}
         page={0}
         itemsPerPage={7}
       />

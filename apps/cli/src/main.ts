@@ -1,4 +1,5 @@
 import { exec } from 'child_process';
+import dedent from 'dedent';
 import { existsSync } from 'fs';
 import * as si from 'systeminformation';
 import { inspect, promisify } from 'util';
@@ -6,13 +7,13 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 const execp = promisify(exec);
-const execpnoerr = async (cmd: string): Promise<string> => {
+const execpnoerr = async (cmd: string) => {
   return execp(cmd)
-    .then(({ stdout }) => stdout)
+    .then(({ stdout }) => stdout.trim())
     .catch(() => '');
 };
 
-const inspectObj = (obj: any): string => {
+const inspectObj = (obj: unknown): string => {
   return inspect(obj, {
     showHidden: false,
     depth: null,
@@ -34,28 +35,31 @@ yargs(hideBin(process.argv))
       const nodeVersion = await execpnoerr('node --version');
       const buildInfoJson = await execpnoerr('cat version.json');
       const gitHash = await execpnoerr('git log -1 --format="%H"');
+      const platform = await execpnoerr('uname -a');
 
       const runningInDocker = await execpnoerr(
         'echo $DASHDOT_RUNNING_IN_DOCKER'
       );
+      const image = await execpnoerr('echo $DASHDOT_IMAGE');
       const buildInfo = JSON.parse(buildInfoJson || '{}');
       const version = buildInfo.version ?? 'unknown';
       const buildhash = buildInfo.buildhash ?? gitHash;
 
       console.log(
-        `
-INFO
-=========
-Yarn: ${yarnVersion.trim()}
-Node: ${nodeVersion.trim()}
-Dash: ${version}
+        dedent`
+          INFO
+          =========
+          Yarn: ${yarnVersion}
+          Node: ${nodeVersion}
+          Dash: ${version}
 
-Cwd: ${process.cwd()}
-Hash: ${buildhash}
-In Docker: ${isDocker}
-In Podman: ${isPodman}
-In Docker (env): ${runningInDocker}
-      `.trim()
+          Cwd: ${process.cwd()}
+          Hash: ${buildhash}
+          Platform: ${platform}
+          Docker image: ${image}
+          In Docker: ${isDocker}
+          In Docker (env): ${runningInDocker}
+          In Podman: ${isPodman}`
       );
     }
   )
@@ -94,39 +98,68 @@ In Docker (env): ${runningInDocker}
             'show custom raw info (provide systeminformation function name)',
         }),
     async args => {
+      console.log(
+        dedent`
+          If you were asked to paste the output of this command, please post only the following:
+
+          - On GitHub: Everything between (and excluding) the lines
+          - On Discord: Everything between (and including) the \`\`\`
+
+          ${'-'.repeat(40)}
+
+          <details>
+            <summary>Output:</summary>
+
+          \`\`\`js
+        `
+      );
+
       if (args.os) {
-        console.log('OS:', inspectObj(await si.osInfo()));
+        console.log('const osInfo = ', inspectObj(await si.osInfo()));
       }
       if (args.cpu) {
-        console.log('CPU:', inspectObj(await si.cpu()));
-        console.log('CPU Load:', inspectObj(await si.currentLoad()));
-        console.log('CPU Temp:', inspectObj(await si.cpuTemperature()));
+        console.log('const cpuInfo = ', inspectObj(await si.cpu()));
+        console.log('const cpuLoad = ', inspectObj(await si.currentLoad()));
+        console.log('const cpuTemp = ', inspectObj(await si.cpuTemperature()));
       }
       if (args.ram) {
-        console.log('Mem:', inspectObj(await si.mem()));
-        console.log('Mem Layout:', inspectObj(await si.memLayout()));
+        console.log('const memInfo = ', inspectObj(await si.mem()));
+        console.log('const memLayout = ', inspectObj(await si.memLayout()));
       }
       if (args.storage) {
-        console.log('Disk Layout:', inspectObj(await si.diskLayout()));
-        console.log('FS Size:', inspectObj(await si.fsSize()));
-        console.log('Block Devices:', inspectObj(await si.blockDevices()));
+        console.log('const disks = ', inspectObj(await si.diskLayout()));
+        console.log('const sizes = ', inspectObj(await si.fsSize()));
+        console.log('const blocks = ', inspectObj(await si.blockDevices()));
       }
       if (args.network) {
         console.log(
-          'Network Interfaces:',
+          'const networkInfo = ',
           inspectObj(await si.networkInterfaces())
         );
-        console.log('Network Stats:', inspectObj(await si.networkStats()));
+        console.log(
+          'const networkStats = ',
+          inspectObj(await si.networkStats())
+        );
       }
       if (args.gpu) {
-        console.log('Graphics:', inspectObj(await si.graphics()));
+        console.log('const gpuInfo = ', inspectObj(await si.graphics()));
       }
       if (args.custom) {
         console.log(
-          `Custom [${args.custom}]:`,
+          `const custom_${args.custom}:`,
           inspectObj(await si[args.custom]())
         );
       }
+
+      console.log(
+        dedent`
+          \`\`\`
+          
+          </details>
+          
+          ${'-'.repeat(40)}
+        `
+      );
     }
   )
   .demandCommand(1, 1, 'You need to specify a single command')

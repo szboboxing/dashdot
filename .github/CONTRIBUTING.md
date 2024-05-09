@@ -26,7 +26,20 @@ When you are done with all that, you can start a dev server using `docker-compos
 with:
 
 ```bash
-yarn run dev
+yarn dev
+```
+
+### Network
+
+If you want to have a speedtest result in your network graph, create a file at the root
+of the project named `speedtest_result`, with the following content and then restart your backend.
+
+```json
+{
+  "unit": "byte",
+  "speedDown": 150000000,
+  "speedUp": 50000000
+}
 ```
 
 ## Git
@@ -35,7 +48,7 @@ Development is done on the `dev` branch, so please use that as the base branch i
 
 This project uses semantic commit messages - if you are unsure on how to create a semantic commit message,
 you can check out the [Semantic Commit Message Standards](https://www.conventionalcommits.org/en/v1.0.0/),
-or run the interactive commit message creator, which will create the commit message for your:
+or run the interactive commit message creator, which will create the commit message for you:
 
 ```bash
 yarn commit

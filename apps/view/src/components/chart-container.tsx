@@ -1,3 +1,4 @@
+import { Transient } from '@dash/common';
 import { motion } from 'framer-motion';
 import { forwardRef, ReactElement } from 'react';
 import { SwapSpinner } from 'react-spinners-kit';
@@ -5,18 +6,17 @@ import ReactVirtualizedAutoSizer from 'react-virtualized-auto-sizer';
 import styled, { useTheme } from 'styled-components';
 import { useIsMobile } from '../services/mobile';
 
-type ContainerProps = {
-  mobile: boolean;
+type ContainerProps = Transient<{
   edges: [boolean, boolean, boolean, boolean];
   loading: boolean;
-};
+}>;
 const Container = styled.div<ContainerProps>`
   position: relative;
   display: flex;
 
   min-width: 0;
   background-color: ${({ theme }) => theme.colors.surface};
-  border-radius: ${({ edges: [top, right, bottom, left] }) =>
+  border-radius: ${({ $edges: [top, right, bottom, left] }) =>
     `${top ? '25px' : '10px'} ${right ? '25px' : '10px'} ${
       bottom ? '25px' : '10px'
     } ${left ? '25px' : '10px'}`};
@@ -28,8 +28,8 @@ const Container = styled.div<ContainerProps>`
 
   > div {
     overflow: hidden;
-    ${({ edges: [top, right, bottom, left], loading }) =>
-      !loading &&
+    ${({ $edges: [top, right, bottom, left], $loading }) =>
+      !$loading &&
       `
     position: absolute;
     border-radius: ${`${top ? '25px' : '10px'} ${right ? '25px' : '10px'} ${
@@ -51,18 +51,23 @@ const Container = styled.div<ContainerProps>`
   }
 `;
 
-const StatText = styled.p<{ float: 'left' | 'right' }>`
+type StatTextProps = Transient<{
+  float: 'left' | 'right';
+  offset?: string;
+  size?: string;
+}>;
+const StatText = styled.p<StatTextProps>`
   position: absolute;
   top: 0;
-  ${({ float }) => (float === 'left' ? 'left: 0' : 'right: 0')};
-  ${({ float }) =>
-    float === 'left'
-      ? 'margin-left: min(13%, 30px)'
-      : 'margin-right: min(13%, 30px)'};
-  margin-top: min(13%, 30px);
+  ${({ $float }) => ($float === 'left' ? 'left: 0' : 'right: 0')};
+  ${({ $float, $offset }) =>
+    $float === 'left'
+      ? `margin-left: ${$offset ?? 'min(13%, 30px)'}`
+      : `margin-right: ${$offset ?? 'min(13%, 30px)'}`};
+  margin-top: ${({ $offset }) => $offset ?? 'min(13%, 30px)'};
+  font-size: ${({ $size }) => $size ?? 'unset'};
   z-index: 2;
   color: ${({ theme }) => theme.colors.text}AA;
-  white-space: nowrap;
 `;
 
 type ChartContainerProps = {
@@ -70,25 +75,37 @@ type ChartContainerProps = {
   edges?: [boolean, boolean, boolean, boolean];
   textLeft?: string;
   textRight?: string;
-  renderChart: (size: { width: number; height: number }) => React.ReactNode;
+  textOffset?: string;
+  textSize?: string;
+  renderChart: (size: { width: number; height: number }) => ReactElement;
 };
 
 export const ChartContainer = motion(
   forwardRef<HTMLDivElement, ChartContainerProps>((props, ref) => {
     const theme = useTheme();
-    const isMobile = useIsMobile();
 
     return (
       <Container
         ref={ref}
-        mobile={isMobile}
-        edges={props.edges ?? [true, true, true, true]}
-        loading={!props.contentLoaded}
+        $edges={props.edges ?? [true, true, true, true]}
+        $loading={!props.contentLoaded}
       >
         {props.contentLoaded ? (
           <>
-            <StatText float='left'>{props.textLeft}</StatText>
-            <StatText float='right'>{props.textRight}</StatText>
+            <StatText
+              $float='left'
+              $offset={props.textOffset}
+              $size={props.textSize}
+            >
+              {props.textLeft}
+            </StatText>
+            <StatText
+              $float='right'
+              $offset={props.textOffset}
+              $size={props.textSize}
+            >
+              {props.textRight}
+            </StatText>
             <ReactVirtualizedAutoSizer
               style={{
                 height: '100%',
@@ -96,7 +113,12 @@ export const ChartContainer = motion(
                 overflow: 'hidden',
               }}
             >
-              {size => props.renderChart(size)}
+              {size =>
+                props.renderChart({
+                  width: size.width ?? 0,
+                  height: size.height ?? 0,
+                })
+              }
             </ReactVirtualizedAutoSizer>
           </>
         ) : (

@@ -18,12 +18,18 @@ type GpuChartProps = {
   load: GpuLoad[];
   index: number;
   showPercentages: boolean;
+  textOffset?: string;
+  textSize?: string;
+  filter?: string;
 };
 
 export const GpuChart: FC<GpuChartProps> = ({
   load,
   index,
   showPercentages,
+  textOffset,
+  textSize,
+  filter,
 }) => {
   const theme = useTheme();
 
@@ -36,47 +42,63 @@ export const GpuChart: FC<GpuChartProps> = ({
     y: load.layout[index].memory,
   })) as ChartVal[];
 
-  return (
-    <MultiChartContainer columns={2}>
-      <ChartContainer
-        contentLoaded={chartDataLoad.length > 1}
-        textLeft={
-          showPercentages
-            ? `%: ${(chartDataLoad.at(-1)?.y as number)?.toFixed(1)} (Load)`
-            : undefined
-        }
-        renderChart={size => (
-          <DefaultAreaChart
-            data={chartDataLoad}
-            height={size.height}
-            width={size.width}
-            color={theme.colors.gpuPrimary}
-            renderTooltip={val => `${val.payload?.[0]?.value?.toFixed(1)} %`}
-          >
-            <YAxis hide={true} type='number' domain={[-5, 105]} />
-          </DefaultAreaChart>
-        )}
-      ></ChartContainer>
-
-      <ChartContainer
-        contentLoaded={chartDataMemory.length > 1}
-        textLeft={`%: ${(chartDataMemory.at(-1)?.y as number)?.toFixed(
-          1
-        )} (Memory)`}
-        renderChart={size => (
-          <DefaultAreaChart
-            data={chartDataMemory}
-            height={size.height}
-            width={size.width}
-            color={theme.colors.gpuPrimary}
-            renderTooltip={val => `${val.payload?.[0]?.value?.toFixed(1)} %`}
-          >
-            <YAxis hide={true} type='number' domain={[-5, 105]} />
-          </DefaultAreaChart>
-        )}
-      ></ChartContainer>
-    </MultiChartContainer>
+  const chartLoad = (
+    <ChartContainer
+      contentLoaded={chartDataLoad.length > 1}
+      textLeft={
+        showPercentages
+          ? `%: ${(chartDataLoad.at(-1)?.y as number)?.toFixed(1)} (Load)`
+          : undefined
+      }
+      textOffset={textOffset}
+      textSize={textSize}
+      renderChart={size => (
+        <DefaultAreaChart
+          data={chartDataLoad}
+          height={size.height}
+          width={size.width}
+          color={theme.colors.gpuPrimary}
+          renderTooltip={val => `${val.payload?.[0]?.value?.toFixed(1)} %`}
+        >
+          <YAxis hide={true} type='number' domain={[-5, 105]} />
+        </DefaultAreaChart>
+      )}
+    ></ChartContainer>
   );
+
+  const chartMemory = (
+    <ChartContainer
+      contentLoaded={chartDataMemory.length > 1}
+      textLeft={`%: ${(chartDataMemory.at(-1)?.y as number)?.toFixed(
+        1
+      )} (Memory)`}
+      textOffset={textOffset}
+      textSize={textSize}
+      renderChart={size => (
+        <DefaultAreaChart
+          data={chartDataMemory}
+          height={size.height}
+          width={size.width}
+          color={theme.colors.gpuPrimary}
+          renderTooltip={val => `${val.payload?.[0]?.value?.toFixed(1)} %`}
+        >
+          <YAxis hide={true} type='number' domain={[-5, 105]} />
+        </DefaultAreaChart>
+      )}
+    ></ChartContainer>
+  );
+
+  if (filter === 'load')
+    return <MultiChartContainer columns={1}>{chartLoad}</MultiChartContainer>;
+  else if (filter === 'memory')
+    return <MultiChartContainer columns={1}>{chartMemory}</MultiChartContainer>;
+  else
+    return (
+      <MultiChartContainer columns={2}>
+        {chartLoad}
+        {chartMemory}
+      </MultiChartContainer>
+    );
 };
 
 type GpuWidgetProps = {
@@ -98,28 +120,14 @@ export const GpuWidget: FC<GpuWidgetProps> = ({ load, data, config }) => {
         const model = override.gpu_models[i] ?? gpu.model;
         const memory = override.gpu_memories[i] ?? gpu.memory;
 
-        return toInfoTable(
-          config.gpu_label_list,
-          {
-            brand: 'Brand',
-            model: 'Model',
-            memory: 'Memory',
+        return toInfoTable(config.gpu_label_list, {
+          brand: { label: 'Brand', value: brand },
+          model: { label: 'Model', value: model },
+          memory: {
+            label: 'Memory',
+            value: memory ? bytePrettyPrint(memory * 1024 * 1024) : memory,
           },
-          [
-            {
-              key: 'brand',
-              value: brand,
-            },
-            {
-              key: 'model',
-              value: model,
-            },
-            {
-              key: 'memory',
-              value: memory ? bytePrettyPrint(memory * 1024 * 1024) : memory,
-            },
-          ]
-        );
+        });
       }),
     [
       config.gpu_label_list,

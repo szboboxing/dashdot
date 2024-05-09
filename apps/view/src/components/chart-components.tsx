@@ -1,12 +1,15 @@
+import { clamp } from '@dash/common';
 import { motion } from 'framer-motion';
 import { FC, useMemo, useRef, useState } from 'react';
 import {
   Area,
   AreaChart,
   BarChart,
+  LabelProps,
   Pie,
   PieChart,
   Sector,
+  SectorProps,
   Tooltip,
   TooltipProps,
   XAxis,
@@ -14,6 +17,7 @@ import {
 } from 'recharts';
 import styled, { useTheme } from 'styled-components';
 import { throttle } from 'throttle-debounce';
+import { ChartVal } from '../utils/types';
 import { ThemedText } from './text';
 
 type DefaultAreaChartProps = {
@@ -21,7 +25,7 @@ type DefaultAreaChartProps = {
   width: number;
   color: string;
   children: React.ReactNode;
-  data: any[];
+  data: ChartVal[];
   renderTooltip?: (point: TooltipProps<number, string>) => React.ReactNode;
 };
 
@@ -104,7 +108,7 @@ const getCoords = (
 
   return { top, left };
 };
-const renderActiveShape = (props: any) => {
+const renderActiveShape = (props: SectorProps & { outerRadius: number }) => {
   return <Sector {...props} outerRadius={props.outerRadius * 1.08} />;
 };
 
@@ -114,7 +118,10 @@ type DefaultPieChartProps = {
   width: number;
   color: string;
   children: React.ReactNode;
-  data: any[];
+  data: {
+    name: string;
+    value: number;
+  }[];
   hoverLabelRenderer: (label: string, value: number) => string;
 };
 export const DefaultPieChart: FC<DefaultPieChartProps> = ({
@@ -231,12 +238,42 @@ const ToolTipContainer = styled.div`
   gap: 5px;
 `;
 
+export const VertBarStartLabel: FC<
+  LabelProps & {
+    labelRenderer: (value: number) => string;
+  }
+> = props => {
+  const theme = useTheme();
+
+  return (
+    <text
+      x={props.x}
+      y={(props.y as number) + (props.height as number) / 2}
+      width={props.width}
+      height={props.height}
+      offset={props.offset}
+      className='recharts-text recharts-label'
+      text-anchor='start'
+      fill={theme.colors.text}
+    >
+      <tspan x={(props.x as number) + (props.offset as number)} dy='0.355em'>
+        {props.labelRenderer(props.value as number)}
+      </tspan>
+    </text>
+  );
+};
+
 type DefaultVertBarChartProps = {
   height: number;
   width: number;
   children: React.ReactNode;
-  data: any[];
-  tooltipRenderer: (value: any) => React.ReactNode;
+  data: {
+    used: number;
+    available: number;
+  }[];
+  tooltipRenderer: (
+    value: TooltipProps<string | number | (string | number)[], string | number>
+  ) => React.ReactNode;
 };
 
 export const DefaultVertBarChart: FC<DefaultVertBarChartProps> = ({
@@ -246,7 +283,7 @@ export const DefaultVertBarChart: FC<DefaultVertBarChartProps> = ({
   children,
   tooltipRenderer,
 }) => {
-  const barSize = Math.min(Math.max(height / data.length - 20, 20), 50);
+  const barSize = clamp(height / data.length - 20, 10, 60);
   const gap = (data.length - 1) * 10;
   const allBars = barSize * data.length;
   const margin = (height - gap - allBars) / 2;
@@ -259,7 +296,7 @@ export const DefaultVertBarChart: FC<DefaultVertBarChartProps> = ({
       layout={'vertical'}
       margin={{
         top: margin,
-        bottom: margin,
+        bottom: data.length === 1 ? margin / 2 : margin,
         right: 20,
         left: 20,
       }}
@@ -271,6 +308,7 @@ export const DefaultVertBarChart: FC<DefaultVertBarChartProps> = ({
       <Tooltip
         cursor={false}
         content={x => <ToolTipContainer>{tooltipRenderer(x)}</ToolTipContainer>}
+        wrapperStyle={{ outline: 'none' }}
       />
       {children}
     </BarChart>

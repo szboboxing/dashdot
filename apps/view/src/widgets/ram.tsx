@@ -20,12 +20,16 @@ export type RamChartProps = {
   load: RamLoad[];
   data: RamInfo;
   showPercentages: boolean;
+  textOffset?: string;
+  textSize?: string;
 };
 
 export const RamChart: FC<RamChartProps> = ({
   load,
   data,
   showPercentages,
+  textOffset,
+  textSize,
 }) => {
   const theme = useTheme();
 
@@ -40,11 +44,13 @@ export const RamChart: FC<RamChartProps> = ({
         contentLoaded={chartData.length > 1}
         textLeft={
           showPercentages
-            ? `%: ${(chartData[chartData.length - 1]?.y as number)?.toFixed(
+            ? `%: ${(chartData.at(-1)?.y as number)?.toFixed(
                 1
-              )} (${bytePrettyPrint(load[load.length - 1] ?? 0)})`
+              )} (${bytePrettyPrint(load.at(-1) ?? 0)})`
             : undefined
         }
+        textOffset={textOffset}
+        textSize={textSize}
         renderChart={size => (
           <DefaultAreaChart
             data={chartData}
@@ -96,33 +102,21 @@ export const RamWidget: FC<RamWidgetProps> = ({ load, data, config }) => {
     <HardwareInfoContainer
       color={theme.colors.ramPrimary}
       heading='Memory'
-      infos={toInfoTable(
-        config.ram_label_list,
-        {
-          brand: brands.length > 1 ? 'Brands' : 'Brand',
-          size: 'Size',
-          type: types.length > 1 ? 'Types' : 'Type',
-          frequency: frequencies.length > 1 ? 'Frequencies' : 'Frequency',
+      infos={toInfoTable(config.ram_label_list, {
+        brand: {
+          label: brands.length > 1 ? 'Brands' : 'Brand',
+          value: brands.join(', '),
         },
-        [
-          {
-            key: 'brand',
-            value: brands.join(', '),
-          },
-          {
-            key: 'size',
-            value: size ? `${bytePrettyPrint(size)}` : '',
-          },
-          {
-            key: 'type',
-            value: types.join(', '),
-          },
-          {
-            key: 'frequency',
-            value: frequencies.join(', '),
-          },
-        ]
-      )}
+        size: { label: 'Size', value: size ? `${bytePrettyPrint(size)}` : '' },
+        type: {
+          label: types.length > 1 ? 'Types' : 'Type',
+          value: types.join(', '),
+        },
+        frequency: {
+          label: frequencies.length > 1 ? 'Frequencies' : 'Frequency',
+          value: frequencies.join(', '),
+        },
+      })}
       infosPerPage={7}
       icon={faMemory}
     >

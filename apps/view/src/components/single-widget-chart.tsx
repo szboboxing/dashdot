@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { ComponentProps, ComponentType, FC } from 'react';
 import styled from 'styled-components';
 import { usePageData } from '../services/page-data';
 import { useQuery } from '../services/query-params';
@@ -9,7 +9,7 @@ import { NetworkChart } from '../widgets/network';
 import { RamChart } from '../widgets/ram';
 import { StorageChart } from '../widgets/storage';
 
-const Container = styled.div<{ radius: number; gap?: number }>`
+const Container = styled.div<{ radius?: string; gap?: string }>`
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -23,13 +23,13 @@ const Container = styled.div<{ radius: number; gap?: number }>`
       position: relative;
       right: unset;
       bottom: unset;
-      ${({ gap }) => (gap ? `gap: ${gap}px;` : '')}
+      gap: ${({ gap }) => gap ?? '12px'};
 
       > div {
-        border-radius: ${({ radius }) => radius}px;
+        border-radius: ${({ radius }) => radius ?? '10px'};
 
         > div {
-          border-radius: ${({ radius }) => radius}px;
+          border-radius: ${({ radius }) => radius ?? '10px'};
         }
 
         &::before {
@@ -39,6 +39,20 @@ const Container = styled.div<{ radius: number; gap?: number }>`
     }
   }
 `;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Graph<T extends ComponentType<any>> = {
+  Component: T;
+  props: Omit<ComponentProps<T>, 'showPercentages'>;
+};
+
+type GraphMap = {
+  cpu: Graph<typeof CpuChart>;
+  storage: Graph<typeof StorageChart>;
+  ram: Graph<typeof RamChart>;
+  network: Graph<typeof NetworkChart>;
+  gpu: Graph<typeof GpuChart>;
+};
 
 export const SingleWidgetChart: FC = () => {
   const {
@@ -58,11 +72,9 @@ export const SingleWidgetChart: FC = () => {
     return <ErrorWidget errorText={error.text} />;
   }
 
-  if (!pageLoaded || !config || !query.isSingleGraphMode) return null;
+  if (!pageLoaded || !config || !serverInfo || !query.singleWidget) return null;
 
-  const showPercentages = query.showPercentage;
-
-  const configs = {
+  const configs: GraphMap = {
     cpu: {
       Component: CpuChart,
       props: {
@@ -75,7 +87,7 @@ export const SingleWidgetChart: FC = () => {
       Component: StorageChart,
       props: {
         load: storageLoad,
-        data: serverInfo?.storage,
+        data: serverInfo.storage,
         config: config,
         multiView: query.multiView ?? false,
       },
@@ -91,8 +103,9 @@ export const SingleWidgetChart: FC = () => {
       Component: NetworkChart,
       props: {
         load: networkLoad,
-        data: serverInfo?.network,
+        data: serverInfo.network,
         config: config,
+        filter: query.filter,
       },
     },
     gpu: {
@@ -100,20 +113,23 @@ export const SingleWidgetChart: FC = () => {
       props: {
         load: gpuLoad,
         index: 0,
+        filter: query.filter,
       },
     },
   };
 
-  const compConfig = configs[query.graph as keyof typeof configs];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const compConfig = configs[query.graph] as Graph<any>;
 
   if (!compConfig) return null;
 
   return (
     <Container radius={query.radius} gap={query.gap}>
-      {/*@ts-ignore */}
       <compConfig.Component
         {...compConfig.props}
-        showPercentages={showPercentages}
+        showPercentages={query.showPercentage}
+        textOffset={query.textOffset}
+        textSize={query.textSize}
       />
     </Container>
   );
